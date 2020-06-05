@@ -2,8 +2,9 @@
 An LSTM-A3C model AI to help me beat Breakout
 
 ## Getting Started
-
-## Resources
+1. Clone Repo
+2. Execute main.py
+3. Watch the AI go to work and come back when it's completed
 
 ## Dependencies
     conda install -c pytorch pytorch
