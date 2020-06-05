@@ -29,3 +29,23 @@ def train(rank, params, shared_model, optimizer):
     state = torch.from_numpy(state) # converting the numpy array into a torch tensor
     done = True # when the game is done
     episode_length = 0 # initializing the length of an episode to 0
+    
+    while True: # repeat
+        episode_length += 1 # incrementing the episode length by one
+        model.load_state_dict(shared_model.state_dict()) # synchronizing with the shared model - the agent gets the shared model to do an exploration on num_steps
+        if done: # if it is the first iteration of the while loop or if the game was just done, then:
+            cx = Variable(torch.zeros(1, 256)) # the cell states of the LSTM are reinitialized to zero
+            hx = Variable(torch.zeros(1, 256)) # the hidden states of the LSTM are reinitialized to zero
+        else: # else:
+            cx = Variable(cx.data) # we keep the old cell states, making sure they are in a torch variable
+            hx = Variable(hx.data) # we keep the old hidden states, making sure they are in a torch variable
+        values = [] # initializing the list of values (V(S))
+        log_probs = [] # initializing the list of log probabilities
+        rewards = [] # initializing the list of rewards
+        entropies = [] # initializing the list of entropies
+        for step in range(params.num_steps): # going through the num_steps exploration steps
+            value, action_values, (hx, cx) = model((Variable(state.unsqueeze(0)), (hx, cx))) # getting from the model the output V(S) of the critic, the output Q(S,A) of the actor, and the new hidden & cell states
+            prob = F.softmax(action_values) # generating a distribution of probabilities of the Q-values according to the softmax: prob(a) = exp(prob(a))/sum_b(exp(prob(b)))
+            log_prob = F.log_softmax(action_values) # generating a distribution of log probabilities of the Q-values according to the log softmax: log_prob(a) = log(prob(a))
+            entropy = -(log_prob * prob).sum(1) # H(p) = - sum_x p(x).log(p(x))
+            entropies.append(entropy) # storing the computed entropy
