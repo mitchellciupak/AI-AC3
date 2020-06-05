@@ -56,7 +56,15 @@ def train(rank, params, shared_model, optimizer):
             rewards.append(reward) # storing the new observed reward
             if done: # if we are done
                 break # we stop the exploration and we directly move on to the next step: the update of the shared model
-            
+        R = torch.zeros(1, 1) # intializing the cumulative reward
+        if not done: # if we are not done:
+            value, _, _ = model((Variable(state.unsqueeze(0)), (hx, cx))) # we initialize the cumulative reward with the value of the last shared state
+            R = value.data # we initialize the cumulative reward with the value of the last shared state
+        values.append(Variable(R)) # storing the value V(S) of the last reached state S
+        policy_loss = 0 # initializing the policy loss
+        value_loss = 0 # initializing the value loss
+        R = Variable(R) # making sure the cumulative reward R is a torch Variable
+        gae = torch.zeros(1, 1) # initializing the Generalized Advantage Estimation to 0
             
             
             
