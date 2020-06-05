@@ -65,6 +65,13 @@ def train(rank, params, shared_model, optimizer):
         value_loss = 0 # initializing the value loss
         R = Variable(R) # making sure the cumulative reward R is a torch Variable
         gae = torch.zeros(1, 1) # initializing the Generalized Advantage Estimation to 0
+        for i in reversed(range(len(rewards))): # starting from the last exploration step and going back in time
+            R = params.gamma * R + rewards[i] # R = gamma*R + r_t = r_0 + gamma r_1 + gamma^2 * r_2 ... + gamma^(n-1)*r_(n-1) + gamma^nb_step * V(last_state)
+            advantage = R - values[i] # R is an estimator of Q at time t = i so advantage_i = Q_i - V(state_i) = R - value[i]
+            value_loss = value_loss + 0.5 * advantage.pow(2) # computing the value loss
+            TD = rewards[i] + params.gamma * values[i + 1].data - values[i].data # computing the temporal difference
+            gae = gae * params.gamma * params.tau + TD # gae = sum_i (gamma*tau)^i * TD(i) with gae_i = gae_(i+1)*gamma*tau + (r_i + gamma*V(state_i+1) - V(state_i))
+            policy_loss = policy_loss - log_probs[i] * Variable(gae) - 0.01 * entropies[i] # computing the policy loss
             
             
             
