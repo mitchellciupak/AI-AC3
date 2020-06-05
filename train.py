@@ -49,3 +49,18 @@ def train(rank, params, shared_model, optimizer):
             log_prob = F.log_softmax(action_values) # generating a distribution of log probabilities of the Q-values according to the log softmax: log_prob(a) = log(prob(a))
             entropy = -(log_prob * prob).sum(1) # H(p) = - sum_x p(x).log(p(x))
             entropies.append(entropy) # storing the computed entropy
+            if done: # if the episode is done:
+                episode_length = 0 # we restart the environment
+                state = env.reset() # we restart the environment
+            state = torch.from_numpy(state) # tensorizing the new state
+            rewards.append(reward) # storing the new observed reward
+            if done: # if we are done
+                break # we stop the exploration and we directly move on to the next step: the update of the shared model
+            
+            
+            
+            
+            
+            
+            
+            
