@@ -1,6 +1,9 @@
 # AI-AC3 Breakout Smart Player
 An LSTM-A3C model AI to help me beat Breakout
 
+## Getting Started
+
+## Resources
 
 ## Dependencies
     conda install -c pytorch pytorch
