@@ -8,5 +8,11 @@ Created on Fri Jun  5 10:47:22 2020
 #Import
 import numpy as np
 import torch
-import tourch.nn as nn
-import tourch.nn.functional as F
+import torch.nn as nn
+import torch.nn.functional as F
+
+#Init and Set Variance of Tensor Weights
+def normalized_columns_initializer(weights, std=1.0):
+    out = torch.randn(weights.size())
+    out *= std / torch.sqrt(out.pow(2).sum(1).expand_as(out))
+    return out
