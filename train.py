@@ -72,6 +72,11 @@ def train(rank, params, shared_model, optimizer):
             TD = rewards[i] + params.gamma * values[i + 1].data - values[i].data # computing the temporal difference
             gae = gae * params.gamma * params.tau + TD # gae = sum_i (gamma*tau)^i * TD(i) with gae_i = gae_(i+1)*gamma*tau + (r_i + gamma*V(state_i+1) - V(state_i))
             policy_loss = policy_loss - log_probs[i] * Variable(gae) - 0.01 * entropies[i] # computing the policy loss
+        optimizer.zero_grad() # initializing the optimizer
+        (policy_loss + 0.5 * value_loss).backward() # we give 2x more importance to the policy loss than the value loss because the policy loss is smaller
+        torch.nn.utils.clip_grad_norm(model.parameters(), 40) # clamping the values of gradient between 0 and 40 to prevent the gradient from taking huge values and degenerating the algorithm
+        ensure_shared_grads(model, shared_model) # making sure the model of the agent and the shared model share the same gradient
+        optimizer.step() # running the optimization step
             
             
             
